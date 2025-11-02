@@ -44,14 +44,13 @@ A lightweight ASP.NET Core MVC application to **upload, modify, and download SQL
 ## ⚙️ Project Setup
 
 ### 1️⃣ Clone the Repository
-```bash
+
 git clone https://github.com/yourusername/SSRSReportHelper.git
 cd SSRSReportHelper
 2️⃣ Configure SSRS Settings
 In appsettings.json:
 
-json
-Copy code
+
 {
   "Logging": {
     "LogLevel": {
@@ -68,8 +67,6 @@ All logs are handled by NLog and stored under /logs automatically.
 
 nlog.config
 
-xml
-Copy code
 <target xsi:type="File" name="mainFile"
         fileName="logs/SSRSUploader.log"
         archiveFileName="logs/archives/SSRSUploader.{#}.log"
@@ -87,8 +84,7 @@ Copy code
 <logger name="FailedReport" minlevel="Info" writeTo="failedFile" />
 📂 Logs created:
 
-bash
-Copy code
+
 /logs
    SSRSUploader.log
    FailedReports.log
@@ -114,8 +110,7 @@ Click Upload Reports.
 
 Each file is uploaded via:
 
-xml
-Copy code
+
 <CreateCatalogItem>
   <ItemType>Report</ItemType>
   <Definition>{Base64EncodedRDL}</Definition>
@@ -123,8 +118,7 @@ Copy code
 </CreateCatalogItem>
 If a data source is selected, the app automatically injects:
 
-xml
-Copy code
+
 <DataSourceReference>/Data Sources/MainDS</DataSourceReference>
 into the .rdl XML before upload.
 
@@ -141,8 +135,6 @@ A .zip containing .rdl files is generated.
 
 SOAP API used:
 
-xml
-Copy code
 <GetItemDefinition>
   <ItemPath>/Folder/ReportName</ItemPath>
 </GetItemDefinition>
@@ -154,8 +146,7 @@ Download Section	Folder + report selection with Fetch button
 Logs	Show upload/download success or errors
 
 🧩 Folder Structure
-pgsql
-Copy code
+
 SSRSReportHelper/
 │
 ├── Controllers/
@@ -190,8 +181,7 @@ Action	HTTP	Description
 /SSRS/GetReportsList	POST	Returns reports for folder (JSON)
 
 🧾 Example Log Output
-pgsql
-Copy code
+
 2025-11-05 12:04:51 | INFO | ✅ Connection Successful
 2025-11-05 12:05:14 | INFO | Uploaded report 'SalesSummary' to '/KWT_UAT'
 2025-11-05 12:06:03 | INFO | Downloading report: /KWT_UAT/AgeBandReport
