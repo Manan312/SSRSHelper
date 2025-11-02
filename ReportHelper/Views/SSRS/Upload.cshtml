@@ -1,0 +1,189 @@
+﻿@model List<ReportHelper.Models.SSRSItemsModel>
+@{
+    ViewData["Title"] = "SSRS Report Manager";
+    var conn = ViewBag.Connection as ReportHelper.Models.SSRSConnectionModel;
+    var dataSources = ViewBag.DataSources as List<ReportHelper.Models.SSRSItemsModel>;
+}
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/js/Upload.js"></script>
+}
+
+<div class="container mt-4">
+    <h2 class="text-primary mb-4">📊 SSRS Report Management</h2>
+
+    <!-- ✅ Alerts -->
+    @if (TempData["ErrorMsg"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMsg"]</div>
+    }
+    @if (TempData["SuccessMsg"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMsg"]</div>
+    }
+    @if (TempData["UploadMsg"] != null)
+    {
+        <div class="alert alert-success">@TempData["UploadMsg"]</div>
+    }
+
+    <hr />
+
+    <!-- ================= UPLOAD SECTION ================= -->
+    <h3>Upload Reports to SSRS</h3>
+    <form asp-action="UploadReports" method="post" enctype="multipart/form-data" class="border p-3 bg-light rounded shadow-sm">
+        <input type="hidden" name="serverUrl" value="@conn.ReportServerUrl" />
+        <input type="hidden" name="username" value="@conn.Username" />
+        <input type="hidden" name="password" value="@conn.Password" />
+
+        <div class="mb-3">
+            <label class="form-label"><b>Select Target Folder:</b></label><br />
+            @foreach (var folder in Model.Where(x => x.Type == "Folder"))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="folderPath" value="@folder.Path" required />
+                    <label class="form-check-label">@folder.Name</label>
+                </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><b>Assign Shared Data Source:</b></label>
+            <select name="dataSourcePath" class="form-select" style="max-width: 400px;">
+                <option value="">-- No Data Source --</option>
+                @foreach (var ds in dataSources)
+                {
+                    <option value="@ds.Path">@ds.Name</option>
+                }
+            </select>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="overwrite" id="overwrite" checked>
+            <label class="form-check-label" for="overwrite">
+                Override existing reports if they already exist
+            </label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><b>Select up to 200 .rdl files:</b></label>
+            <input type="file" name="files" class="form-control" multiple accept=".rdl" required />
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-upload"></i> Upload Reports
+        </button>
+    </form>
+
+    <hr class="my-4" />
+
+    <!-- ================= EXPORT SECTION ================= -->
+    <h3>Export Existing Reports Metadata</h3>
+    <p class="text-muted">
+        Download a list of all reports (Name, Path, Created & Modified Date) from the selected folder.
+    </p>
+
+    <form asp-action="ExportReports" method="post" class="border p-3 bg-light rounded shadow-sm">
+        <input type="hidden" name="serverUrl" value="@conn.ReportServerUrl" />
+        <input type="hidden" name="username" value="@conn.Username" />
+        <input type="hidden" name="password" value="@conn.Password" />
+
+        <div class="mb-3">
+            <label class="form-label"><b>Select Folder:</b></label><br />
+            @foreach (var folder in Model.Where(x => x.Type == "Folder"))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="folderPath" value="@folder.Path" required />
+                    <label class="form-check-label">@folder.Name</label>
+                </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><b>Export Format:</b></label>
+            <select name="format" class="form-select" style="max-width: 250px;">
+                <option value="excel">Excel (.xlsx)</option>
+                <option value="csv">CSV (.csv)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-info">
+            <i class="bi bi-file-earmark-arrow-down"></i> Export Reports Metadata
+        </button>
+    </form>
+
+    <hr class="my-4" />
+
+    <!-- ================= INFO SECTION ================= -->
+    <hr class="my-4" />
+
+    <!-- ==================== DOWNLOAD SECTION ==================== -->
+    <h3>Download All Reports</h3>
+    <p class="text-muted">Select a folder to download all reports (.rdl) as a ZIP file.</p>
+
+    <form asp-action="DownloadAll" method="post" class="border p-3 rounded bg-light shadow-sm">
+        <input type="hidden" name="serverUrl" value="@conn.ReportServerUrl" />
+        <input type="hidden" name="username" value="@conn.Username" />
+        <input type="hidden" name="password" value="@conn.Password" />
+
+        <div class="mb-3">
+            <label class="form-label"><b>Select Folder:</b></label><br />
+            @foreach (var folder in Model.Where(x => x.Type == "Folder"))
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="folderPath" value="@folder.Path" required />
+                    <label class="form-check-label">@folder.Name</label>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-download"></i> Download All Reports (.zip)
+        </button>
+    </form>
+    <hr class="my-4" />
+    <h3>Select Reports to Download</h3>
+
+    <form asp-action="DownloadSelected" method="post" class="border p-3 rounded bg-light shadow-sm" id="downloadForm">
+        <input type="hidden" name="serverUrl" value="@conn.ReportServerUrl" />
+        <input type="hidden" name="username" value="@conn.Username" />
+        <input type="hidden" name="password" value="@conn.Password" />
+
+        <div class="mb-3">
+            <label><b>Select Folder:</b></label><br />
+            @foreach (var folder in Model.Where(x => x.Type == "Folder"))
+            {
+                <div class="form-check">
+                    <input class="form-check-input folder-radio" type="radio" name="folderPath" value="@folder.Path" required />
+                    <label class="form-check-label">@folder.Name</label>
+                </div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <button type="button" id="fetchReportsBtn" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Fetch Reports
+            </button>
+        </div>
+
+        <div class="mb-3">
+            <label><b>Reports to Download:</b></label>
+            <div id="reportsList" class="p-2 border rounded bg-white" style="max-height: 400px; overflow-y: auto;">
+                <p class="text-muted">Select a folder and click "Fetch Reports" to view available reports.</p>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-download"></i> Download Selected Reports (.zip)
+        </button>
+    </form>
+
+    <div class="text-secondary small">
+        <p>🛈 <b>Notes:</b></p>
+        <ul>
+            <li>Maximum 200 reports can be uploaded in a single batch.</li>
+            <li>All logs are written to <code>logs/SSRSUploader.log</code> and <code>logs/FailedReports.log</code>.</li>
+            <li>You can export report metadata anytime without uploading.</li>
+        </ul>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">

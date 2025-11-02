@@ -1,0 +1,44 @@
+﻿@model ReportHelper.Models.SSRSConnectionModel
+@{
+    ViewData["Title"] = "SSRS Connection";
+}
+
+<h2>Connect to SSRS Server</h2>
+<form asp-action="CheckConnection" method="post">
+    <div class="mb-3">
+        <label>Report Server URL</label>
+        <input asp-for="ReportServerUrl" class="form-control" placeholder="http://server/ReportServer" required />
+    </div>
+    <div class="mb-3">
+        <label>Username</label>
+        <input asp-for="Username" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <input asp-for="Password" type="password" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Check Connection</button>
+</form>
+
+@if (TempData["ConnMsg"] != null)
+{
+    <div class="alert alert-info mt-3">@TempData["ConnMsg"]</div>
+}
+
+@if (TempData["ErrorMsg"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["ErrorMsg"]</div>
+}
+
+@if (TempData["UploadMsg"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["UploadMsg"]</div>
+}
+@if (TempData["ErrorMsg"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["ErrorMsg"]</div>
+}
+@if (TempData["SuccessMsg"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["SuccessMsg"]</div>
+}
